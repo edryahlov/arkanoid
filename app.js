@@ -80,7 +80,7 @@ window.onload = function() {
     function checkCollision() {
         for (var i=0; i<blockCoords.length; i++) {
             if (
-                blockCoords[i].coord.x <= ball.x && (blockCoords[i].coord.x + block.width) >= ball.x &&
+                blockCoords[i].coord.x <= (ball.x + ball.rad) && (blockCoords[i].coord.x + block.width) >= (ball.x - ball.rad) &&
                 blockCoords[i].coord.y <= ((ball.y - ball.rad) && (ball.y + ball.rad)) &&
                 (blockCoords[i].coord.y + block.height) >= ((ball.y - ball.rad))
             ) {
