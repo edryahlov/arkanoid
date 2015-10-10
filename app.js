@@ -12,9 +12,9 @@ window.onload = function() {
     var knock = new Audio('knock.mp3');
     var glass = new Audio('glass.mp3');
     var music = new Audio('music.mp3');
-        music.loop = true;
+        //music.loop = true;
         music.currentTime = 6;
-        music.volume=0.7;
+        music.volume=0.9;
     
     var block = {
             height : 20,
@@ -36,6 +36,7 @@ window.onload = function() {
     var url = "shape_level1.txt";
     var collision = false, collisionWithBlock, collisionWithBorderX = false, collisionWithBorderY = false;
     var tickInterval = ball.speed;
+    var safeBorders = 5;
     
     var blockOrder = getBlockOrder(url);
     var blockCoords = new Array(0);
@@ -89,15 +90,15 @@ window.onload = function() {
             }
         }
         if (
-            (ball.y + ball.rad) > canvas.height-5 || 
-            (ball.y - ball.rad) <= 0
+            (ball.y + ball.rad) > canvas.height - safeBorders || 
+            (ball.y - ball.rad) <= 0 + safeBorders
         ) {
             collision = true;
             collisionWithBorderY = true;
         }
         if (
-            (ball.x + ball.rad) >= canvas.width || 
-            (ball.x - ball.rad) <= 0
+            (ball.x + ball.rad) >= canvas.width - safeBorders || 
+            (ball.x - ball.rad) <= 0 + safeBorders
         ) {
             collision = true;
             collisionWithBorderX = true;
