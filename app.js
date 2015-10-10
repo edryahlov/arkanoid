@@ -160,7 +160,7 @@ window.onload = function() {
     }
     
     function getBlockOrder(url) {
-        var stringData = $.ajax({url: url, async: false}).responseText;
+        var stringData = $.ajax({url: url, async: true}).responseText;
         return stringData.split("\r\n");
     }
     
