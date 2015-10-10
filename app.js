@@ -3,42 +3,60 @@
 window.onload = function() {
     "use strict";
     
-    var version = 0.2;
+    var version = 0.5;
     document.getElementById("ver").innerHTML = '(ver. '+ String(version)+')';
     
     var canvas = document.getElementById("game");
     var context = canvas.getContext("2d");
     
+    var knock = new Audio('knock.mp3');
+    var glass = new Audio('glass.mp3');
+    var music = new Audio('music.mp3');
+        music.loop = true;
+        music.currentTime = 6;
+        music.volume=0.7;
+    
     var block = {
-            height : 50,
-            width : 100
+            height : 20,
+            width : 50
     };
+
     var ball = {
-            x : 400,
-            y : 300,
+            x : 200,
+            y : 100,
             rad : 10,
             direction : {
                 x : "none",
                 y : "up"
             },
-            speed : 20
+            speed : 1,
+            step : 1
     };
     
     var url = "shape_level1.txt";
     var collision = false, collisionWithBlock, collisionWithBorderX = false, collisionWithBorderY = false;
-    var tickInterval = 100;
+    var tickInterval = ball.speed;
     
     var blockOrder = getBlockOrder(url);
     var blockCoords = new Array(0);
     
-    canvas.width = block.width * blockOrder[0].length;
-    canvas.height = 500;
-
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-    ///////////////////////////////////////
-
+    var longestLine;
+    for (var i=0; i<blockOrder.length-1; i++) {
+        longestLine = Math.max(blockOrder[i].length,blockOrder[i+1].length);
+    }
+    c(longestLine);
+    canvas.width = block.width * longestLine;
+    canvas.height = block.height * blockOrder.length + 200;
     
+    ball.x = canvas.width / 2;
+    //ball.y = canvas.height - (ball.rad + 5);
+    
+
+    ///////////////////////////////////////
+    ///////////////////////////////////////
+    ///////////////////////////////////////
+
+    music.play();
     getBlockCoords();
     
     setInterval(function(){
@@ -62,15 +80,16 @@ window.onload = function() {
         for (var i=0; i<blockCoords.length; i++) {
             if (
                 blockCoords[i].coord.x <= ball.x && (blockCoords[i].coord.x + block.width) >= ball.x &&
-                blockCoords[i].coord.y <= (ball.y - ball.rad) && (blockCoords[i].coord.y + block.height) >= (ball.y - ball.rad)
+                blockCoords[i].coord.y <= ((ball.y - ball.rad) && (ball.y + ball.rad)) &&
+                (blockCoords[i].coord.y + block.height) >= ((ball.y - ball.rad))
             ) {
                 collision = true;
-                collisionWithBlock = i;
+                collisionWithBlock = String(i);
                 break;
             }
         }
         if (
-            (ball.y + ball.rad) >= canvas.height || 
+            (ball.y + ball.rad) > canvas.height-5 || 
             (ball.y - ball.rad) <= 0
         ) {
             collision = true;
@@ -91,19 +110,35 @@ window.onload = function() {
             context.fillStyle = "red";
             context.fillRect(blockCoords[collisionWithBlock].coord.x, blockCoords[collisionWithBlock].coord.y, block.width, block.height);
             blockCoords.splice(collisionWithBlock,1);
+            //c(collisionWithBlock +', left: '+ blockCoords.length);
+            
         }
 
         if (ball.direction.x === "none") {ball.direction.x = "left";}
 
-        if (ball.direction.x === "left" && collisionWithBorderX) {ball.direction.x = "right";}
-        else if (ball.direction.x === "right" && collisionWithBorderX) {ball.direction.x = "left";}
+        if (ball.direction.x === "left" && collisionWithBorderX) {
+            ball.direction.x = "right";
+        }
+        else if (ball.direction.x === "right" && collisionWithBorderX) {
+            ball.direction.x = "left";
+        }
 
         if (!collisionWithBorderX) {
             switch (ball.direction.y) {
                 case "up": ball.direction.y = "down"; break;
                 case "down": ball.direction.y = "up"; break;
             }
+            
         }
+        
+        if (collisionWithBorderX || collisionWithBorderY) {
+            knock.currentTime = 0;
+            knock.play();
+        } else {
+            glass.currentTime = 0;
+            glass.play();
+        }
+        
         
         collision = '';
         collisionWithBlock = '';
@@ -114,12 +149,12 @@ window.onload = function() {
     function moveBall() {
         switch (ball.direction.x) {
             case "none": break;
-            case "left": ball.x -= ball.rad; break;
-            case "right": ball.x += ball.rad; break;
+            case "left": ball.x -= ball.step; break;
+            case "right": ball.x += ball.step; break;
         }
         switch (ball.direction.y) {
-            case "up": ball.y -= ball.speed; break;
-            case "down": ball.y += ball.speed; break;
+            case "up": ball.y -= ball.step; break;
+            case "down": ball.y += ball.step; break;
         }
     }
     
@@ -139,6 +174,11 @@ window.onload = function() {
                         x: x,
                         y: y
                     },
+                    color : [
+                        Math.floor(Math.random()*200),
+                        Math.floor(Math.random()*200),
+                        Math.floor(Math.random()*200)
+                    ],
                     type : "-",
                     show : true
                 };
@@ -149,7 +189,7 @@ window.onload = function() {
     function drawBlocks() {
         for (var i=0; i<blockCoords.length; i++) {
             //context.fillStyle = 'rgb('+Math.floor(Math.random()*250)+','+Math.floor(Math.random()*250)+','+Math.floor(Math.random()*250)+')';
-            context.fillStyle = "black";
+            context.fillStyle = 'rgb('+blockCoords[i].color[0]+','+blockCoords[i].color[1]+','+blockCoords[i].color[2]+')';
             context.fillRect(blockCoords[i].coord.x, blockCoords[i].coord.y, block.width, block.height);
         }
     }
