@@ -1,5 +1,6 @@
 body {
     font-family: sans-serif;
+    background-color: silver;
 }
 #game {
     border: solid 1px #ccc;

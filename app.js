@@ -16,7 +16,7 @@ window.onload = function() {
     var music = new Audio('music.mp3');
         music.loop = true;
         music.currentTime = 6;
-        music.volume=0.2;
+        music.volume=0.1;
     
     var block = {
             height : 20,
@@ -87,7 +87,7 @@ window.onload = function() {
     ///////////////////////////////////////
     
     function changeLevel() {
-        if (lvl === 6) {
+        if (lvl != 5) {
             lvl++;
             blockOrder = getBlockOrder();
             document.getElementById("lvl").innerHTML = lvl;
@@ -111,9 +111,10 @@ window.onload = function() {
         /////////// detect block collision
         for (var i=0; i<blockCoords.length; i++) {
             if (
-                blockCoords[i].coord.x <= (ball.x + ball.rad) && (blockCoords[i].coord.x + block.width) >= (ball.x - ball.rad) &&
+                (blockCoords[i].coord.x <= (ball.x + ball.rad) && (blockCoords[i].coord.x + block.width) >= (ball.x - ball.rad) &&
                 blockCoords[i].coord.y <= ((ball.y - ball.rad) && (ball.y + ball.rad)) &&
-                (blockCoords[i].coord.y + block.height) >= ((ball.y - ball.rad))
+                (blockCoords[i].coord.y + block.height) >= ((ball.y - ball.rad))) &&
+                blockCoords[i].type === '-'
             ) {
                 collision = true;
                 collisionWithBlock = String(i);
@@ -206,24 +207,32 @@ window.onload = function() {
     }
     
     function getBlockCoords() {
+        var blockType, add;
+
         for (var i=0; i<blockOrder.length; i++) {
             for (var z=0; z<blockOrder[i].length; z++) {
                 var x = z * block.width;
                 var y = i * block.height;
-                var blockType = blockOrder[i][z] || '0';
                 
-                blockCoords[blockCoords.length] = {
-                    coord : {
-                        x: x,
-                        y: y
-                    },
-                    color : [
-                        Math.floor(Math.random()*200),
-                        Math.floor(Math.random()*200),
-                        Math.floor(Math.random()*200)
-                    ],
-                    type : blockType
-                };
+                if (blockOrder[i][z] === '-') {
+                    blockType = blockOrder[i][z];
+                    add = true;
+                } else {add = false;}
+                
+                if (add) {
+                    blockCoords[blockCoords.length] = {
+                        coord : {
+                            x: x,
+                            y: y
+                        },
+                        color : [
+                            Math.floor(Math.random()*200),
+                            Math.floor(Math.random()*200),
+                            Math.floor(Math.random()*200)
+                        ],
+                        type : blockType
+                    };
+                }
             }
         }
     }
@@ -232,6 +241,9 @@ window.onload = function() {
         for (var i=0; i<blockCoords.length; i++) {
             if (blockCoords[i].type === '-') {
                 context.fillStyle = 'rgb('+blockCoords[i].color[0]+','+blockCoords[i].color[1]+','+blockCoords[i].color[2]+')';
+                context.fillRect(blockCoords[i].coord.x, blockCoords[i].coord.y, block.width, block.height);
+            } else if (blockCoords[i].type === '') {
+                context.fillStyle = 'red';
                 context.fillRect(blockCoords[i].coord.x, blockCoords[i].coord.y, block.width, block.height);
             }
         }
@@ -250,5 +262,15 @@ window.onload = function() {
     }
     
     function c(out) {console.log(out);}
-};
 
+    document.addEventListener('touchmove', function(event) {
+      if (event.targetTouches.length == 1) {
+        var touch = event.targetTouches[0];
+        if (touch.pageX >= 0 && touch.pageX <= (canvas.width - block.width * 2)) {
+            bat.x = touch.pageX;
+            //bat.y = touch.pageY;
+        }
+      }
+    }, false);
+
+};
